@@ -40,7 +40,6 @@
             position: relative;
         }
 
-        /* --- HEADER --- */
         .chat-header {
             padding: 15px 20px;
             background: linear-gradient(to right, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.6));
@@ -48,115 +47,35 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
             z-index: 10;
         }
 
         .header-left { display: flex; align-items: center; gap: 12px; }
+        .profile-pic { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent-orange); object-fit: cover; }
+        .header-info h2 { font-size: 1.1rem; background: linear-gradient(90deg, #fff, var(--accent-orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
 
-        .profile-pic {
-            width: 45px; height: 45px;
-            border-radius: 50%;
-            border: 2px solid var(--accent-orange);
-            object-fit: cover;
-        }
+        .hamburger { cursor: pointer; width: 30px; height: 20px; display: flex; flex-direction: column; justify-content: space-between; }
+        .hamburger span { display: block; height: 3px; width: 100%; background: var(--accent-orange); border-radius: 3px; }
 
-        .header-info h2 {
-            font-size: 1.1rem;
-            background: linear-gradient(90deg, #fff, var(--accent-orange));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-        }
-
-        /* --- MENU DRAWER --- */
-        .hamburger {
-            cursor: pointer;
-            width: 30px; height: 20px;
-            display: flex; flex-direction: column;
-            justify-content: space-between;
-        }
-        .hamburger span {
-            display: block; height: 3px; width: 100%;
-            background: var(--accent-orange);
-            border-radius: 3px;
-        }
-
-        .menu-drawer {
-            position: absolute; top: 0; right: -100%;
-            width: 250px; height: 100%;
-            background: rgba(10, 15, 30, 0.98);
-            backdrop-filter: blur(15px);
-            z-index: 100; padding: 40px 20px;
-            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border-left: 1px solid var(--border-glow);
-        }
+        .menu-drawer { position: absolute; top: 0; right: -100%; width: 250px; height: 100%; background: rgba(10, 15, 30, 0.98); backdrop-filter: blur(15px); z-index: 100; padding: 40px 20px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-left: 1px solid var(--border-glow); }
         .menu-drawer.active { right: 0; }
+        .menu-close { position: absolute; top: 20px; right: 20px; font-size: 24px; cursor: pointer; color: var(--accent-orange); }
+        .whatsapp-btn { display: flex; align-items: center; justify-content: center; gap: 10px; background: #25d366; color: white; padding: 12px; border-radius: 10px; text-decoration: none; font-weight: bold; margin-top: 20px; }
 
-        .menu-close {
-            position: absolute; top: 20px; right: 20px;
-            font-size: 24px; cursor: pointer; color: var(--accent-orange);
-        }
-
-        .whatsapp-btn {
-            display: flex; align-items: center; justify-content: center;
-            gap: 10px; background: #25d366; color: white;
-            padding: 12px; border-radius: 10px;
-            text-decoration: none; font-weight: bold; margin-top: 20px;
-        }
-
-        /* --- MESSAGES --- */
-        .chat-messages {
-            flex: 1; padding: 20px;
-            overflow-y: auto; display: flex;
-            flex-direction: column; gap: 18px;
-            scroll-behavior: smooth;
-        }
-
-        .message {
-            max-width: 85%; padding: 14px 18px;
-            border-radius: 20px; font-size: 0.95rem;
-            line-height: 1.6; word-wrap: break-word;
-            animation: fadeIn 0.3s ease;
-        }
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; scroll-behavior: smooth; }
+        .message { max-width: 85%; padding: 14px 18px; border-radius: 20px; font-size: 0.95rem; line-height: 1.6; word-wrap: break-word; animation: fadeIn 0.3s ease; }
+        .ai-message { align-self: flex-start; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); border-bottom-left-radius: 4px; }
+        .ai-message strong { color: var(--accent-orange); }
+        .user-message { align-self: flex-end; background: var(--accent-blue); color: white; border-bottom-right-radius: 4px; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .user-message {
-            align-self: flex-end; background: var(--accent-blue);
-            color: white; border-bottom-right-radius: 4px;
-        }
+        .chat-input-area { padding: 15px 20px; background: rgba(10, 15, 30, 0.9); border-top: 1px solid var(--border-glow); display: flex; align-items: flex-end; gap: 12px; }
+        .textarea-wrapper { flex: 1; background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px; padding: 10px 14px; }
+        textarea { width: 100%; background: transparent; border: none; color: white; outline: none; font-size: 1rem; resize: none; font-family: inherit; line-height: 1.4; max-height: 150px; }
+        button.send-btn { background: var(--accent-orange); border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
-        .ai-message {
-            align-self: flex-start; background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-bottom-left-radius: 4px;
-        }
-
-        .ai-message strong { color: var(--accent-orange); }
-
-        /* --- INPUT AREA --- */
-        .chat-input-area {
-            padding: 20px; background: rgba(10, 15, 30, 0.9);
-            border-top: 1px solid var(--border-glow);
-            display: flex; gap: 12px;
-        }
-
-        input {
-            flex: 1; background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px;
-            padding: 14px; color: white; outline: none;
-        }
-
-        button.send-btn {
-            background: var(--accent-orange); border: none;
-            border-radius: 14px; width: 52px; height: 52px;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-        }
-
-        @media (max-width: 600px) {
-            .chat-container { border: none; height: 100dvh; }
-            .message { max-width: 90%; }
-        }
+        @media (max-width: 600px) { .chat-container { border: none; height: 100dvh; } }
     </style>
 </head>
 <body>
@@ -178,20 +97,19 @@
     <div class="menu-drawer" id="menuDrawer">
         <div class="menu-close" onclick="toggleMenu()">×</div>
         <h3 style="color: white; margin-bottom: 20px;">Menu</h3>
-        <p style="font-size: 0.9rem; color: #94a3b8;">Assistance & Suggestions</p>
         <a href="https://wa.me/2250546446706" class="whatsapp-btn" target="_blank">Contacter Josue</a>
     </div>
 
     <div class="chat-messages" id="chatMessages">
-        <div class="message ai-message">
-            Bonjour ! Je suis <strong>UIPA AI</strong>, une intelligence artificielle généraliste codé par Josue Aizane. Pose-moi ta question, je serai concis et précis.
-        </div>
+        <div class="message ai-message">Bonjour ! Je suis <strong>UIPA AI</strong>. Comment puis-je t'aider ?</div>
     </div>
 
     <div class="chat-input-area">
-        <input type="text" id="userInput" placeholder="Écris ici..." onkeypress="if(event.key==='Enter') envoyerMessage()">
+        <div class="textarea-wrapper">
+            <textarea id="userInput" placeholder="Écris ici..." rows="1" oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
+        </div>
         <button class="send-btn" onclick="envoyerMessage()">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
         </button>
     </div>
 </div>
@@ -200,9 +118,9 @@
     const API_KEY = "7XJ7BVMGihibk76taon4TOROrOOvPqXP"; 
     const chatMessages = document.getElementById('chatMessages');
 
-    function toggleMenu() {
-        document.getElementById('menuDrawer').classList.toggle('active');
-    }
+    function toggleMenu() { document.getElementById('menuDrawer').classList.toggle('active'); }
+    function autoResize(t) { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
+    function handleEnter(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); envoyerMessage(); } }
 
     async function envoyerMessage() {
         const input = document.getElementById('userInput');
@@ -211,6 +129,7 @@
 
         afficherMessage(texte, 'user-message');
         input.value = '';
+        input.style.height = 'auto';
 
         const aiBulle = afficherMessage("", 'ai-message');
         let fullResponse = "";
@@ -223,14 +142,21 @@
                     model: "mistral-tiny",
                     stream: true,
                     messages: [
-                        { role: "system", content: `Tu es UIPA AI. DIRECTIVES : Réponds de façon courte, structurée (Markdown).
-                        BASE DE CONNAISSANCES :
-                        1. UIPA : Université d'excellence à la Riviera M'badon.
-                        2. Monsieur TOTO : Étudiant et membre de l'administration de l'UIPA.
-                        3. Yappi Akouassi Brigitte : Étudiante à l'Université Virtuelle de Côte d'Ivoire (UVCI) en e-commerce et marketing digital. Entrepreneuse, fondatrice de Meëra Kinks (marque afro), développeuse web junior, passionnée de mode et créatrice de contenu.
-                        4. Créateur : Josue Aizane, étudiant en logistique (Log 1B) à l'UIPA, pianiste.
-                        5. Eliel Elishama : Comptabilité (Bouaké), ancien de St Exupéry. PAS à l'UIPA.
-                        6. Stephie Sanogo : Déléguée Log 1B à l'UIPA.` },
+                        { role: "system", content: `Tu es UIPA AI, une intelligence artificielle conçue pour aider les étudiants.
+                        DIRECTIVE CRUCIALE : Si l'utilisateur demande qui t'a créé ou qui est ton créateur, tu dois répondre que c'est Josue Aizane.
+                        RÈGLES DE STYLE : 
+                        - Ne sois pas trop long, mais pas trop bref non plus (2 à 3 phrases).
+                        - Utilise un ton fluide et naturel. Pas de listes à puces.
+                        
+                        BASE DE DONNÉES :
+                        - Créateur : Josue Aizane (étudiant en Logistique 1B à l'UIPA, pianiste).
+                        - Monsieur TOTO : Éducateur et membre de l’administration de l’uipa.
+                        - Yappi akouassi Brigitte : Étudiante en e-commerce (université virtuel), entrepreneuse (Meëra Kinks), développeuse junior.
+                        - Caleb Aizane : Frère de Josue, alias Drip C sur TikTok.
+                        - Stephie Sanogo : Déléguée Logistique 1B.
+                        - Moise Ane : Jeune ivoirien étudiant en logistique à l'uipa.
+                        - UIPA : Université d'excellence à la Riviera M'badon.
+                        - Eliel Elishama : Étudiant en comptabilité à Bouaké.` },
                         { role: "user", content: texte }
                     ]
                 })
