@@ -65,17 +65,14 @@
         .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; scroll-behavior: smooth; }
         .message { max-width: 85%; padding: 14px 18px; border-radius: 20px; font-size: 0.95rem; line-height: 1.6; word-wrap: break-word; animation: fadeIn 0.3s ease; }
         .ai-message { align-self: flex-start; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); border-bottom-left-radius: 4px; }
-        .ai-message strong { color: var(--accent-orange); }
         .user-message { align-self: flex-end; background: var(--accent-blue); color: white; border-bottom-right-radius: 4px; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .chat-input-area { padding: 15px 20px; background: rgba(10, 15, 30, 0.9); border-top: 1px solid var(--border-glow); display: flex; align-items: flex-end; gap: 10px; }
+        .textarea-wrapper { flex: 1; background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px; padding: 10px 14px; display: flex; align-items: flex-end; gap: 10px; }
+        textarea { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 1rem; resize: none; font-family: inherit; line-height: 1.4; max-height: 150px; }
+        .send-btn { background: var(--accent-orange); border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
-        .chat-input-area { padding: 15px 20px; background: rgba(10, 15, 30, 0.9); border-top: 1px solid var(--border-glow); display: flex; align-items: flex-end; gap: 12px; }
-        .textarea-wrapper { flex: 1; background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px; padding: 10px 14px; }
-        textarea { width: 100%; background: transparent; border: none; color: white; outline: none; font-size: 1rem; resize: none; font-family: inherit; line-height: 1.4; max-height: 150px; }
-        button.send-btn { background: var(--accent-orange); border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-
-        @media (max-width: 600px) { .chat-container { border: none; height: 100dvh; } }
+        #fileInput { display: none; }
     </style>
 </head>
 <body>
@@ -101,12 +98,16 @@
     </div>
 
     <div class="chat-messages" id="chatMessages">
-        <div class="message ai-message">Bonjour ! Je suis <strong>UIPA AI une ia codé par Josue Aizane </strong>. Comment puis-je t'aider ?</div>
+        <div class="message ai-message">Bonjour ! Je suis <strong>UIPA AI</strong>, l'intelligence artificielle polyvalente conçue par <strong>Josue Aizane</strong>. Je suis à ton écoute pour toute question.</div>
     </div>
 
     <div class="chat-input-area">
         <div class="textarea-wrapper">
-            <textarea id="userInput" placeholder="Écris ici..." rows="1" oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
+            <label for="fileInput" class="icon-btn" style="cursor: pointer;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+            </label>
+            <input type="file" id="fileInput" onchange="gererFichier(this)">
+            <textarea id="userInput" placeholder="Dis-moi quelque chose..." rows="1" oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
         </div>
         <button class="send-btn" onclick="envoyerMessage()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
@@ -122,6 +123,13 @@
     function autoResize(t) { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
     function handleEnter(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); envoyerMessage(); } }
 
+    function gererFichier(input) {
+        if (input.files && input.files[0]) {
+            afficherMessage(`Fichier : ${input.files[0].name}`, 'user-message');
+            setTimeout(() => { afficherMessage("Document reçu. Que souhaites-tu faire avec ?", 'ai-message'); }, 600);
+        }
+    }
+
     async function envoyerMessage() {
         const input = document.getElementById('userInput');
         const texte = input.value.trim();
@@ -131,7 +139,7 @@
         input.value = '';
         input.style.height = 'auto';
 
-        const aiBulle = afficherMessage("", 'ai-message');
+        const aiBulle = afficherMessage("...", 'ai-message');
         let fullResponse = "";
 
         try {
@@ -142,21 +150,23 @@
                     model: "mistral-tiny",
                     stream: true,
                     messages: [
-                        { role: "system", content: `Tu es UIPA AI, une intelligence artificielle conçue pour aider les étudiants.
-                        DIRECTIVE CRUCIALE : Si l'utilisateur demande qui t'a créé ou qui est ton créateur, tu dois répondre que c'est Josue Aizane.
-                        RÈGLES DE STYLE : 
-                        - Ne sois pas trop long, mais pas trop bref non plus (2 à 3 phrases).
-                        - Utilise un ton fluide et naturel. Pas de listes à puces.
+                        { role: "system", content: `Tu es UIPA AI, une IA polyvalente.
                         
-                        BASE DE DONNÉES :
-                        - Créateur : Josue Aizane (étudiant en Logistique 1B à l'UIPA, pianiste).
-                        - Monsieur TOTO : Éducateur et membre de l’administration de l’uipa.
-                        - Yappi akouassi Brigitte : Étudiante en e-commerce (université virtuel), entrepreneuse (Meëra Kinks), développeuse junior.
-                        - Caleb Aizane : Frère de Josue, alias Drip C sur TikTok.
-                        - Stephie Sanogo : Déléguée Logistique 1B.
-                        - Moise Ane : Jeune ivoirien étudiant en logistique à l'uipa.
-                        - UIPA : Université d'excellence à la Riviera M'badon.
-                        - Eliel Elishama : Étudiant en comptabilité à Bouaké.` },
+                        CRÉATEUR : Josue Aizane, passionné d'informatique et pianiste. Sa petite amie est Stephie Sanogo.
+                        
+                        CONNAISSANCES PERSONNALISÉES :
+                        - Stephie Sanogo (Stephie star) : Étudiante en logistique à UIPA, déléguée de la Log 1B et petite amie de Josue.
+                        - Membres de la classe Log 1B : Moise Ane, Chibozo (une fille qui est major de la filière), Zouzou Eminem (sous-délégué), Nangui Alexandra (meilleure amie de Stephie), Laeticia Ouattara, Sana Fabienne et Treh Samuel.
+                        - Naim : Uniquement le neveu de Stephie Sanogo. Il n'est pas le cousin de Josue.
+                        - Caleb Aizane : Frère de Josue (TikTok Drip C).
+                        - Monsieur Toto : Éducateur et membre de l'administration à UIPA.
+                        - Eliel Elishama : Jeune étudiant en comptabilité à Bouaké.
+                        - Yappi Akouassi Brigitte : Étudiante en e-commerce et marketing digital, entrepreneuse (Meëra Kinks), développeuse web junior et créatrice de contenu.
+
+                        STYLE : 
+                        - Réponses équilibrées (3 à 6 phrases).
+                        - INTERDICTION d'utiliser des listes ou des tirets.
+                        - Tu réponds à toutes les questions (sciences, code, quotidien, etc.).` },
                         { role: "user", content: texte }
                     ]
                 })
@@ -164,6 +174,7 @@
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
+            aiBulle.innerHTML = "";
 
             while (true) {
                 const { done, value } = await reader.read();
