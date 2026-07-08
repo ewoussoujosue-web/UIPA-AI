@@ -7,126 +7,586 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
-            --bg-dark: #050810;
-            --panel-bg: rgba(13, 18, 33, 0.9);
-            --accent-orange: #ff9900;
-            --accent-blue: #2563eb;
-            --text-main: #f1f5f9;
-            --border-glow: rgba(255, 153, 0, 0.3);
+            --bg-dark: #0a0e1a;
+            --bg-light: #f0f4ff;
+            --panel-dark: rgba(16, 22, 42, 0.95);
+            --panel-light: rgba(255, 255, 255, 0.95);
+            --accent-primary: #6c5ce7;
+            --accent-secondary: #00b4d8;
+            --accent-gradient: linear-gradient(135deg, #6c5ce7, #00b4d8);
+            --text-dark: #f0f4ff;
+            --text-light: #1a1f3a;
+            --text-muted-dark: #a0b4c8;
+            --text-muted-light: #6b7a8f;
+            --border-dark: rgba(108, 92, 231, 0.2);
+            --border-light: rgba(108, 92, 231, 0.12);
+            --msg-ai-dark: rgba(255, 255, 255, 0.05);
+            --msg-ai-light: rgba(108, 92, 231, 0.04);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: var(--bg-dark);
+            --panel-bg: var(--panel-dark);
+            --text-main: var(--text-dark);
+            --text-muted: var(--text-muted-dark);
+            --border-glow: var(--border-dark);
+            --msg-ai: var(--msg-ai-dark);
+            --bg-image: radial-gradient(ellipse at 20% 50%, rgba(108, 92, 231, 0.08), transparent 60%),
+                         radial-gradient(ellipse at 80% 50%, rgba(0, 180, 216, 0.06), transparent 60%),
+                         radial-gradient(circle at 50% 0%, #1a1f3a, transparent 70%);
+        }
+
+        [data-theme="light"] {
+            --bg-body: var(--bg-light);
+            --panel-bg: var(--panel-light);
+            --text-main: var(--text-light);
+            --text-muted: var(--text-muted-light);
+            --border-glow: var(--border-light);
+            --msg-ai: var(--msg-ai-light);
+            --bg-image: radial-gradient(ellipse at 20% 50%, rgba(108, 92, 231, 0.04), transparent 60%),
+                         radial-gradient(ellipse at 80% 50%, rgba(0, 180, 216, 0.03), transparent 60%),
+                         radial-gradient(circle at 50% 0%, #e8edf8, transparent 70%);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-dark);
-            background-image: radial-gradient(circle at 50% -20%, #1e293b, transparent);
+            background: var(--bg-body);
+            background-image: var(--bg-image);
             color: var(--text-main);
             height: 100dvh;
             display: flex;
             justify-content: center;
             overflow: hidden;
+            transition: background 0.4s ease, color 0.4s ease;
         }
 
         .chat-container {
             width: 100%;
-            max-width: 700px;
+            max-width: 480px;
             display: flex;
             flex-direction: column;
             background: var(--panel-bg);
             backdrop-filter: blur(20px);
-            border-left: 1px solid rgba(255, 255, 255, 0.05);
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 40px rgba(108, 92, 231, 0.08);
             position: relative;
+            height: 100dvh;
+            transition: background 0.4s ease;
         }
 
+        /* ===== HEADER AVEC BANNIÈRE OPTIMISÉE POUR VOIR LA PERSONNE ===== */
         .chat-header {
-            padding: 15px 20px;
-            background: linear-gradient(to right, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.6));
-            border-bottom: 1px solid var(--border-glow);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            padding: 0;
+            background: transparent;
+            flex-shrink: 0;
+            position: relative;
             z-index: 10;
         }
 
-        .header-left { display: flex; align-items: center; gap: 12px; }
-        .profile-pic { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent-orange); object-fit: cover; }
-        .header-info h2 { font-size: 1.1rem; background: linear-gradient(90deg, #fff, var(--accent-orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
+        .header-banner {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+            background: var(--bg-body);
+        }
 
-        .hamburger { cursor: pointer; width: 30px; height: 20px; display: flex; flex-direction: column; justify-content: space-between; }
-        .hamburger span { display: block; height: 3px; width: 100%; background: var(--accent-orange); border-radius: 3px; }
+        .header-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 20%;
+            display: block;
+            transform: scale(1.1);
+        }
 
-        .menu-drawer { position: absolute; top: 0; right: -100%; width: 250px; height: 100%; background: rgba(10, 15, 30, 0.98); backdrop-filter: blur(15px); z-index: 100; padding: 40px 20px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-left: 1px solid var(--border-glow); }
+        .header-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 45%;
+            background: linear-gradient(to top, var(--panel-bg), transparent);
+            pointer-events: none;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px 14px;
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--border-glow);
+            backdrop-filter: blur(12px);
+            position: relative;
+            z-index: 2;
+            transition: background 0.4s ease;
+        }
+
+        .header-left { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        }
+
+        .profile-pic { 
+            width: 44px; 
+            height: 44px; 
+            border-radius: 50%; 
+            border: 2.5px solid var(--accent-secondary);
+            object-fit: cover;
+            box-shadow: 0 0 20px rgba(0, 180, 216, 0.15);
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+        }
+        .profile-pic:hover { transform: scale(1.05); }
+
+        .header-info h2 { 
+            font-size: 1rem; 
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+        }
+
+        .header-info .status {
+            font-size: 0.6rem;
+            color: #34d399;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+        .header-info .status::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #34d399;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-glow);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s ease;
+            color: var(--text-main);
+            flex-shrink: 0;
+        }
+        .theme-toggle:hover {
+            background: rgba(108, 92, 231, 0.15);
+            transform: scale(1.05);
+        }
+        .theme-toggle svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .hamburger { 
+            cursor: pointer; 
+            width: 24px; 
+            height: 18px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between;
+            padding: 1px 0;
+            flex-shrink: 0;
+        }
+        .hamburger span { 
+            display: block; 
+            height: 2.5px; 
+            width: 100%; 
+            background: var(--accent-secondary);
+            border-radius: 3px;
+            transition: 0.3s ease;
+        }
+        .hamburger:hover span { background: var(--accent-primary); }
+
+        /* ===== MENU LATÉRAL ===== */
+        .menu-drawer { 
+            position: absolute; 
+            top: 0; 
+            right: -100%; 
+            width: 280px; 
+            height: 100%; 
+            background: rgba(8, 12, 28, 0.98);
+            backdrop-filter: blur(20px);
+            z-index: 100; 
+            padding: 50px 24px; 
+            transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-left: 1px solid var(--border-glow);
+        }
+        [data-theme="light"] .menu-drawer {
+            background: rgba(240, 244, 255, 0.98);
+        }
         .menu-drawer.active { right: 0; }
-        .menu-close { position: absolute; top: 20px; right: 20px; font-size: 24px; cursor: pointer; color: var(--accent-orange); }
-        .whatsapp-btn { display: flex; align-items: center; justify-content: center; gap: 10px; background: #25d366; color: white; padding: 12px; border-radius: 10px; text-decoration: none; font-weight: bold; margin-top: 20px; }
+        .menu-close { 
+            position: absolute; 
+            top: 20px; 
+            right: 24px; 
+            font-size: 26px; 
+            cursor: pointer; 
+            color: var(--accent-secondary);
+            transition: 0.3s;
+            line-height: 1;
+        }
+        .menu-close:hover { color: var(--accent-primary); transform: rotate(90deg); }
+        .menu-drawer h3 { 
+            color: var(--text-main);
+            margin-bottom: 20px;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            opacity: 0.8;
+        }
+        .menu-divider {
+            height: 1px;
+            background: var(--border-glow);
+            margin: 14px 0 18px;
+        }
+        .menu-drawer p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 18px;
+            line-height: 1.6;
+        }
+        .menu-drawer p strong {
+            color: var(--accent-secondary);
+        }
+        .whatsapp-btn { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+            background: #25d366; 
+            color: white; 
+            padding: 12px; 
+            border-radius: 12px; 
+            text-decoration: none; 
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.25);
+        }
+        .whatsapp-btn:hover { transform: scale(1.02); box-shadow: 0 6px 25px rgba(37, 211, 102, 0.35); }
+        .whatsapp-btn svg { width: 20px; height: 20px; fill: white; flex-shrink: 0; }
 
-        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; scroll-behavior: smooth; }
-        .message { max-width: 85%; padding: 14px 18px; border-radius: 20px; font-size: 0.95rem; line-height: 1.6; word-wrap: break-word; animation: fadeIn 0.3s ease; }
-        .ai-message { align-self: flex-start; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); border-bottom-left-radius: 4px; }
-        .user-message { align-self: flex-end; background: var(--accent-blue); color: white; border-bottom-right-radius: 4px; }
+        /* ===== MESSAGES ===== */
+        .chat-messages { 
+            flex: 1; 
+            padding: 16px 14px 12px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            scroll-behavior: smooth; 
+        }
+        .chat-messages::-webkit-scrollbar { width: 3px; }
+        .chat-messages::-webkit-scrollbar-track { background: transparent; }
+        .chat-messages::-webkit-scrollbar-thumb { background: var(--accent-primary); border-radius: 10px; }
 
-        .chat-input-area { padding: 15px 20px; background: rgba(10, 15, 30, 0.9); border-top: 1px solid var(--border-glow); display: flex; align-items: flex-end; gap: 10px; }
-        .textarea-wrapper { flex: 1; background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px; padding: 10px 14px; display: flex; align-items: flex-end; gap: 10px; }
-        textarea { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 1rem; resize: none; font-family: inherit; line-height: 1.4; max-height: 150px; }
-        .send-btn { background: var(--accent-orange); border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .message { 
+            max-width: 90%; 
+            padding: 10px 14px; 
+            border-radius: 14px; 
+            font-size: 0.88rem; 
+            line-height: 1.55; 
+            word-wrap: break-word; 
+            animation: fadeIn 0.3s ease; 
+        }
+        .ai-message { 
+            align-self: flex-start; 
+            background: var(--msg-ai);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom-left-radius: 3px;
+            color: var(--text-main);
+        }
+        .ai-message strong { color: var(--accent-secondary); }
+        .user-message { 
+            align-self: flex-end; 
+            background: var(--accent-gradient);
+            color: white; 
+            border-bottom-right-radius: 3px;
+            box-shadow: 0 3px 12px rgba(108, 92, 231, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== ZONE DE SAISIE ===== */
+        .chat-input-area { 
+            padding: 10px 14px 14px; 
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border-glow);
+            display: flex; 
+            align-items: flex-end; 
+            gap: 8px; 
+            flex-shrink: 0;
+            transition: background 0.4s ease;
+        }
+
+        .textarea-wrapper { 
+            flex: 1; 
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 18px; 
+            padding: 5px 12px; 
+            display: flex; 
+            align-items: flex-end; 
+            gap: 6px;
+            transition: 0.3s ease;
+        }
+        [data-theme="light"] .textarea-wrapper {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+        .textarea-wrapper:focus-within {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 16px rgba(108, 92, 231, 0.08);
+        }
+
+        textarea { 
+            flex: 1; 
+            background: transparent; 
+            border: none; 
+            color: var(--text-main);
+            outline: none; 
+            font-size: 0.88rem; 
+            resize: none; 
+            font-family: inherit; 
+            line-height: 1.5; 
+            max-height: 120px;
+            padding: 3px 0;
+            min-height: 32px;
+        }
+        textarea::placeholder { color: var(--text-muted); font-size: 0.85rem; }
+
+        .icon-btn {
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: 0.3s ease;
+            display: flex;
+            align-items: center;
+            padding: 2px;
+            flex-shrink: 0;
+        }
+        .icon-btn:hover { color: var(--accent-secondary); }
+        .icon-btn svg { width: 18px; height: 18px; }
+
+        .send-btn { 
+            background: var(--accent-gradient);
+            border: none; 
+            border-radius: 50%; 
+            width: 40px; 
+            height: 40px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-shrink: 0;
+            transition: 0.3s ease;
+            box-shadow: 0 3px 16px rgba(108, 92, 231, 0.2);
+        }
+        .send-btn:hover { transform: scale(1.05); box-shadow: 0 4px 24px rgba(108, 92, 231, 0.3); }
+        .send-btn:active { transform: scale(0.95); }
+        .send-btn svg { width: 18px; height: 18px; stroke: white; stroke-width: 2.5; }
 
         #fileInput { display: none; }
+
+        /* ===== RESPONSIVE MOBILE ===== */
+        @media (max-width: 480px) {
+            .header-banner { height: 180px; }
+            .header-banner img {
+                object-position: center 15%;
+                transform: scale(1.15);
+            }
+            .profile-pic { width: 38px; height: 38px; }
+            .header-info h2 { font-size: 0.9rem; }
+            .header-content { padding: 8px 12px 10px; }
+            .message { font-size: 0.85rem; padding: 9px 12px; max-width: 92%; }
+            .chat-messages { padding: 12px 10px 10px; gap: 10px; }
+            .chat-input-area { padding: 8px 10px 12px; gap: 6px; }
+            .textarea-wrapper { padding: 4px 10px; border-radius: 16px; }
+            textarea { font-size: 0.85rem; }
+            .send-btn { width: 36px; height: 36px; }
+            .send-btn svg { width: 16px; height: 16px; }
+            .theme-toggle { width: 32px; height: 32px; }
+            .theme-toggle svg { width: 16px; height: 16px; }
+            .hamburger { width: 20px; height: 15px; }
+            .menu-drawer { width: 260px; padding: 40px 20px; }
+            .icon-btn svg { width: 16px; height: 16px; }
+        }
+
+        @media (max-width: 380px) {
+            .header-banner { height: 150px; }
+            .header-banner img {
+                object-position: center 10%;
+                transform: scale(1.2);
+            }
+            .profile-pic { width: 32px; height: 32px; }
+            .header-info h2 { font-size: 0.8rem; }
+            .header-info .status { font-size: 0.5rem; }
+            .header-content { padding: 6px 10px 8px; gap: 4px; }
+            .header-left { gap: 8px; }
+            .message { font-size: 0.8rem; padding: 7px 10px; }
+            .chat-input-area { padding: 6px 8px 10px; }
+            .send-btn { width: 32px; height: 32px; }
+            .send-btn svg { width: 14px; height: 14px; }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .header-banner { height: 220px; }
+            .header-banner img {
+                object-position: center 18%;
+                transform: scale(1.08);
+            }
+        }
     </style>
 </head>
 <body>
 
 <div class="chat-container">
+    <!-- ===== HEADER AVEC BANNIÈRE ===== -->
     <div class="chat-header">
-        <div class="header-left">
-            <img src="https://i.postimg.cc/fSC3hdFS/IMG-4001.jpg" class="profile-pic">
-            <div class="header-info">
-                <h2>UIPA AI</h2>
-                <div style="font-size: 0.7rem; color: #10b981;">• En ligne</div>
+        <div class="header-banner">
+            <img src="https://i.postimg.cc/ry7JrgTc/IMG-2173.jpg" alt="UIPA AI Banner">
+            <div class="header-overlay"></div>
+        </div>
+        <div class="header-content">
+            <div class="header-left">
+                <img src="https://i.postimg.cc/fSC3hdFS/IMG-4001.jpg" class="profile-pic" alt="UIPA AI">
+                <div class="header-info">
+                    <h2>UIPA AI</h2>
+                    <div class="status">En ligne</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Changer de thème">
+                    <svg id="themeIcon" viewBox="0 0 24 24"><path d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.41 5.41 0 01-4.4 2.26 5.48 5.48 0 01-3.87-1.6 5.48 5.48 0 01-1.6-3.87 5.41 5.41 0 012.26-4.4A9.01 9.01 0 0012 3z"/></svg>
+                </button>
+                <div class="hamburger" onclick="toggleMenu()">
+                    <span></span><span></span><span></span>
+                </div>
             </div>
         </div>
-        <div class="hamburger" onclick="toggleMenu()">
-            <span></span><span></span><span></span>
+    </div>
+
+    <!-- ===== MENU LATÉRAL ===== -->
+    <div class="menu-drawer" id="menuDrawer">
+        <div class="menu-close" onclick="toggleMenu()">✕</div>
+        <h3>✦ Menu</h3>
+        <div class="menu-divider"></div>
+        <p>
+            🤖 <strong>UIPA AI</strong> — L'intelligence ivoirienne<br><br>
+            Conçue par <strong>Josue Aizane</strong>, passionné d'informatique et pianiste.
+        </p>
+        <a href="https://wa.me/2250546446706" class="whatsapp-btn" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Contacter Josue
+        </a>
+    </div>
+
+    <!-- ===== MESSAGES ===== -->
+    <div class="chat-messages" id="chatMessages">
+        <div class="message ai-message">
+            Bonjour ! Je suis <strong>UIPA AI</strong>, l'intelligence artificielle polyvalente conçue par <strong>Josue Aizane</strong>. Je suis à ton écoute pour toute question.
         </div>
     </div>
 
-    <div class="menu-drawer" id="menuDrawer">
-        <div class="menu-close" onclick="toggleMenu()">×</div>
-        <h3 style="color: white; margin-bottom: 20px;">Menu</h3>
-        <a href="https://wa.me/2250546446706" class="whatsapp-btn" target="_blank">Contacter Josue</a>
-    </div>
-
-    <div class="chat-messages" id="chatMessages">
-        <div class="message ai-message">Bonjour ! Je suis <strong>UIPA AI</strong>, l'intelligence artificielle polyvalente conçue par <strong>Josue Aizane</strong>. Je suis à ton écoute pour toute question.</div>
-    </div>
-
+    <!-- ===== ZONE DE SAISIE ===== -->
     <div class="chat-input-area">
         <div class="textarea-wrapper">
-            <label for="fileInput" class="icon-btn" style="cursor: pointer;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+            <label for="fileInput" class="icon-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
             </label>
             <input type="file" id="fileInput" onchange="gererFichier(this)">
-            <textarea id="userInput" placeholder="Dis-moi quelque chose..." rows="1" oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
+            <textarea id="userInput" placeholder="Pose-moi une question..." rows="1" oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
         </div>
         <button class="send-btn" onclick="envoyerMessage()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="white" stroke-width="2.5" stroke-linejoin="round"/></svg>
         </button>
     </div>
 </div>
 
 <script>
-    const API_KEY = "7XJ7BVMGihibk76taon4TOROrOOvPqXP"; 
+    const API_KEY = "7XJ7BVMGihibk76taon4TOROrOOvPqXP";
     const chatMessages = document.getElementById('chatMessages');
 
-    function toggleMenu() { document.getElementById('menuDrawer').classList.toggle('active'); }
-    function autoResize(t) { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
-    function handleEnter(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); envoyerMessage(); } }
+    // ===== THÈME =====
+    let currentTheme = 'dark';
+
+    function toggleTheme() {
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        localStorage.setItem('theme', currentTheme);
+        updateThemeIcon();
+    }
+
+    function updateThemeIcon() {
+        const icon = document.getElementById('themeIcon');
+        if (currentTheme === 'dark') {
+            icon.innerHTML = '<path d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.41 5.41 0 01-4.4 2.26 5.48 5.48 0 01-3.87-1.6 5.48 5.48 0 01-1.6-3.87 5.41 5.41 0 012.26-4.4A9.01 9.01 0 0012 3z"/>';
+        } else {
+            icon.innerHTML = '<path d="M12 7a5 5 0 015 5 5 5 0 01-5 5 5 5 0 01-5-5 5 5 0 015-5zm0 2a3 3 0 100 6 3 3 0 000-6zm0-7a1 1 0 011 1v1a1 1 0 01-2 0V3a1 1 0 011-1zm0 16a1 1 0 011 1v1a1 1 0 01-2 0v-1a1 1 0 011-1zM4.22 4.22a1 1 0 011.42 0l.7.7a1 1 0 01-1.42 1.42l-.7-.7a1 1 0 010-1.42zm14.14 0a1 1 0 010 1.42l-.7.7a1 1 0 01-1.42-1.42l.7-.7a1 1 0 011.42 0zM3 12a1 1 0 011-1h1a1 1 0 010 2H4a1 1 0 01-1-1zm16 0a1 1 0 011-1h1a1 1 0 010 2h-1a1 1 0 01-1-1zm-2.64 5.64a1 1 0 011.42 0l.7.7a1 1 0 01-1.42 1.42l-.7-.7a1 1 0 010-1.42zM5.64 17.64a1 1 0 010-1.42l.7-.7a1 1 0 011.42 1.42l-.7.7a1 1 0 01-1.42 0z"/>';
+        }
+    }
+
+    // Charger le thème sauvegardé
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    currentTheme = savedTheme;
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    updateThemeIcon();
+
+    // ===== MENU =====
+    function toggleMenu() { 
+        document.getElementById('menuDrawer').classList.toggle('active'); 
+    }
+
+    // ===== CHAT =====
+    function autoResize(t) { 
+        t.style.height = 'auto'; 
+        t.style.height = t.scrollHeight + 'px'; 
+    }
+
+    function handleEnter(e) { 
+        if (e.key === 'Enter' && !e.shiftKey) { 
+            e.preventDefault(); 
+            envoyerMessage(); 
+        } 
+    }
 
     function gererFichier(input) {
         if (input.files && input.files[0]) {
-            afficherMessage(`Fichier : ${input.files[0].name}`, 'user-message');
-            setTimeout(() => { afficherMessage("Document reçu. Que souhaites-tu faire avec ?", 'ai-message'); }, 600);
+            afficherMessage(`📎 Fichier : ${input.files[0].name}`, 'user-message');
+            setTimeout(() => {
+                afficherMessage("Document reçu. Que souhaites-tu faire avec ?", 'ai-message');
+            }, 600);
+            input.value = '';
         }
     }
 
@@ -150,23 +610,22 @@
                     model: "mistral-tiny",
                     stream: true,
                     messages: [
-                        { role: "system", content: `Tu es UIPA AI, une IA polyvalente.
-                        
-                        CRÉATEUR : Josue Aizane, passionné d'informatique et pianiste. Sa petite amie est Stephie Sanogo.
-                        
+                        { role: "system", content: `Tu es UIPA AI, une IA polyvalente et professionnelle.
+
+                        CRÉATEUR : Josue Aizane, passionné d'informatique et pianiste.
+
                         CONNAISSANCES PERSONNALISÉES :
-                        - Stephie Sanogo (Stephie star) : Étudiante en logistique à UIPA, déléguée de la Log 1B et petite amie de Josue.
-                        - Membres de la classe Log 1B : Moise Ane, Chibozo (une fille qui est major de la filière), Zouzou Eminem (sous-délégué), Nangui Alexandra (meilleure amie de Stephie), Laeticia Ouattara, Sana Fabienne et Treh Samuel.
-                        - Naim : Uniquement le neveu de Stephie Sanogo. Il n'est pas le cousin de Josue.
                         - Caleb Aizane : Frère de Josue (TikTok Drip C).
                         - Monsieur Toto : Éducateur et membre de l'administration à UIPA.
                         - Eliel Elishama : Jeune étudiant en comptabilité à Bouaké.
                         - Yappi Akouassi Brigitte : Étudiante en e-commerce et marketing digital, entrepreneuse (Meëra Kinks), développeuse web junior et créatrice de contenu.
+                        - Moise Ane, Chibozo, Zouzou Eminem, Nangui Alexandra, Laeticia Ouattara, Sana Fabienne et Treh Samuel : Membres de la classe Log 1B.
 
-                        STYLE : 
-                        - Réponses équilibrées (3 à 6 phrases).
+                        STYLE :
+                        - Réponses courtes, précises et explicites (3 à 5 phrases maximum).
                         - INTERDICTION d'utiliser des listes ou des tirets.
-                        - Tu réponds à toutes les questions (sciences, code, quotidien, etc.).` },
+                        - Sois professionnel, clair et efficace dans tes réponses.
+                        - Adapte ton ton selon la question posée.` },
                         { role: "user", content: texte }
                     ]
                 })
@@ -192,7 +651,9 @@
                     }
                 });
             }
-        } catch (e) { aiBulle.innerText = "Erreur de connexion."; }
+        } catch (e) { 
+            aiBulle.innerText = "❌ Erreur de connexion. Réessaie plus tard.";
+        }
     }
 
     function afficherMessage(texte, classe) {
